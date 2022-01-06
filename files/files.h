@@ -1,5 +1,5 @@
-#ifndef __APPLET_FILE_H__
-#define __APPLET_FILE_H__
+#ifndef __FILES_H__
+#define __FILES_H__
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
