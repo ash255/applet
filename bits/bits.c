@@ -8,10 +8,24 @@ int bits_pack(uint8_t *bits, int len)
     for (i = 0; i < (len > 32 ? 32 : len); i++)
     {
         val <<= 1;
-        va; |= bits[i];
+        val |= bits[i];
     }
 
     return val;
+}
+
+int bits_to_bytes(uint8_t *bytes, int bytes_len, ubit_t *bits, int bits_len)
+{
+	int i;
+	
+	for(i=0;i<bits_len/8;i++)
+	{
+        if (i >= bits_len)
+            return 0;
+		bytes[i] = bits_pack(&bits[i*8], 8);
+	}
+	
+	return 1;
 }
 
 int bytes_to_bits(uint8_t *bits, int bits_len, uint8_t *bytes, int bytes_len)
