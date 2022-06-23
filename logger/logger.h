@@ -15,49 +15,49 @@ void log_clear_level(int level);
 int chekc_level(int level);
 void log_printf_array(char *level, char *module, char *buffer, int len);
 
-#define __LOG_DEBUG__(mod, fmt, ...)                      \
+#define __LOG_DEBUG__(fmt, ...)                      \
     {                                                     \
         if (chekc_level(__LEVEL_DEBUG__))                 \
         {                                                 \
-            log_printf("DEBUG", mod, fmt, ##__VA_ARGS__); \
+            log_printf("DEBUG", __func__, fmt, ##__VA_ARGS__); \
         }                                                 \
     }
-#define __LOG_MESSAGE__(mod, fmt, ...)                      \
+#define __LOG_MESSAGE__(fmt, ...)                      \
     {                                                       \
         if (chekc_level(__LEVEL_MESSAGE__))                 \
         {                                                   \
-            log_printf("MESSAGE", mod, fmt, ##__VA_ARGS__); \
+            log_printf("MESSAGE", __func__, fmt, ##__VA_ARGS__); \
         }                                                   \
     }
-#define __LOG_ERROR__(mod, fmt, ...)                      \
+#define __LOG_ERROR__(fmt, ...)                      \
     {                                                     \
         if (chekc_level(__LEVEL_ERROR__))                 \
         {                                                 \
-            log_printf("ERROR", mod, fmt, ##__VA_ARGS__); \
+            log_printf("ERROR", __func__, fmt, ##__VA_ARGS__); \
         }                                                 \
     }
 
-#define __LOG_DEBUG_ARRAY__(mod, buffer, len)            \
+#define __LOG_DEBUG_ARRAY__(buffer, len)            \
     {                                                    \
         if (chekc_level(__LEVEL_DEBUG__))                \
         {                                                \
-            log_printf_array("DEBUG", mod, buffer, len); \
+            log_printf_array("DEBUG", __func__, buffer, len); \
         }                                                \
     }
 
-#define __LOG_MESSAGE_ARRAY__(mod, buffer, len)            \
+#define __LOG_MESSAGE_ARRAY__(buffer, len)            \
     {                                                      \
         if (chekc_level(__LEVEL_MESSAGE__))                \
         {                                                  \
-            log_printf_array("MESSAGE", mod, buffer, len); \
+            log_printf_array("MESSAGE", __func__, buffer, len); \
         }                                                  \
     }
 
-#define __LOG_ERROR_ARRAY__(mod, buffer, len)            \
+#define __LOG_ERROR_ARRAY__(buffer, len)            \
     {                                                    \
         if (chekc_level(__LEVEL_ERROR__))                \
         {                                                \
-            log_printf_array("ERROR", mod, buffer, len); \
+            log_printf_array("ERROR", __func__, buffer, len); \
         }                                                \
     }
 
