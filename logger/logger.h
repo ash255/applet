@@ -7,13 +7,13 @@
 #define __LEVEL_ERROR__ 2
 #define __LEVEL_LAST__ 3
 
-void log_printf(char *level, char *module, char *format, ...);
+void log_printf(const char *level, const char *module, const char *format, ...);
 void log_with_fd(FILE *fp);
 void log_with_file(char *file);
 void log_set_level(int level);
 void log_clear_level(int level);
 int chekc_level(int level);
-void log_printf_array(char *level, char *module, char *buffer, int len);
+void log_printf_array(const char *level, const char *module, char *buffer, int len);
 
 #define __LOG_DEBUG__(fmt, ...)                      \
     {                                                     \

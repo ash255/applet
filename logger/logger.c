@@ -21,7 +21,7 @@ void log_with_file(char *file)
     }
 }
 
-void log_printf(char *level, char *module, char *format, ...)
+void log_printf(const char *level, const char *module, const char *format, ...)
 {
     va_list va;
     char format_str[1024] = {0};
@@ -63,7 +63,7 @@ int chekc_level(int level)
     return 0;
 }
 
-void log_printf_array(char *level, char *module, char *buffer, int len)
+void log_printf_array(const char *level, const char *module, char *buffer, int len)
 {
     int i;
 
