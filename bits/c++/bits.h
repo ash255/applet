@@ -2,11 +2,18 @@
 #define __BITS_H__
 #include <stdint.h>
 #include <string>
+#include "logger.h"
 using std::string;
 typedef uint8_t ubit_t;
+
 #ifndef __ERROR
 #define __ERROR printf
 #endif
+
+//typedef cbits sx_bits;
+//typedef cframe sx_frame;
+#define sx_bits cbits
+#define sx_frame cframe
 
 /*
 	为了节省内存空间，所有的数据将以字节的形式保存，并且是从左到右大端序的形式，不足的部分补0
@@ -63,6 +70,7 @@ public:
 	uint8_t* get_data() { return m_data; }
 	READ_MODE get_endian() { return m_endian; }
 	void set_endian(READ_MODE endian) { this->m_endian = endian; }
+	ubit_t *get_data_bits(int *bits_len = nullptr);
 protected:
 	uint8_t *m_data;
 	int m_len_bytes;
@@ -141,11 +149,17 @@ public:
 	cframe(READ_MODE endian = LEFT_BIG_ENDIAN, int offset = 0) :m_offset(offset), cbits(endian) {}
 	cframe(uint8_t* data, int len, bool bits_mode = true, READ_MODE endian = LEFT_BIG_ENDIAN, int offset = 0) :m_offset(offset), cbits(data, len, bits_mode, endian) {}
 	cframe(string str, bool bits_mode = true, READ_MODE endian = LEFT_BIG_ENDIAN, int offset = 0) :m_offset(offset), cbits(str, bits_mode, endian) {}
+	cframe(cbits* bits, int offset = 0);
 
 	/* overwrite methods */
+	int unpack_i(int len) { return this->unpack_i(this->m_offset, len);}
 	int unpack_i(int start, int len);
+	double unpack_d() { return this->unpack_d(this->m_offset); }
 	double unpack_d(int start);
+	float unpack_f() { return this->unpack_f(this->m_offset); }
 	float unpack_f(int start);
+	cframe* copy() { return new cframe(this->m_data, this->m_len_bytes, false, this->m_endian, this->m_offset); }
+	cframe* truncate(int start, int len) { cbits *bits = cbits::truncate(start, len); cframe *frame = new cframe(bits); delete(bits); return frame; }
 
 	/* peek methods */
 	int peek_i(int len) { return this->peek_i(this->m_offset, len); }
@@ -156,7 +170,8 @@ public:
 	float peek_f(int start) { return this->unpack_f(start); }
 
 	/* string format output */
-	string left_bits_str() { return this->bin_str().substr(this->m_offset, this->get_left_len()); }
+	string left_bits_str() { return this->left_bits_str(this->m_offset, this->get_left_len()); }
+	string left_bits_str(int start, int len) { return this->bin_str().substr(start, len); }
 
 	/* get/set methods */
 	int get_offset() { return this->m_offset; }
@@ -164,6 +179,22 @@ public:
 	int get_left_len() { return this->m_len_bits - this->m_offset; }
 private:
 	int m_offset;
+};
+
+class sx_mcs
+{
+public:
+	uint8_t mcs_id;
+	uint16_t cw;
+};
+
+class sx_status
+{
+public:
+	int m_sfid;
+	int m_rlc_mode;
+	int num_mcs;
+	sx_mcs mcs[15];
 };
 
 #endif

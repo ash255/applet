@@ -36,7 +36,7 @@ cbits::cbits(string str, bool bits_mode, READ_MODE endian) :m_data(nullptr), m_e
 {
 	if (bits_mode)
 	{
-		this->m_len_bytes = (str.length() + 7) / 8;
+		this->m_len_bytes = ((int)str.length() + 7) / 8;
 		while ((str.length() % 8) != 0)
 		{
 			if (endian == LEFT_BIG_ENDIAN || endian == LEFT_LITTLE_ENDIAN)
@@ -46,7 +46,7 @@ cbits::cbits(string str, bool bits_mode, READ_MODE endian) :m_data(nullptr), m_e
 		}
 
 		this->m_data = new uint8_t[this->m_len_bytes];
-		this->m_len_bits = str.length();
+		this->m_len_bits = (int)str.length();
 		char buf[9] = { 0 };
 		const char* pStr = str.data();
 		for (int i = 0; i < this->m_len_bytes; i++)
@@ -110,8 +110,11 @@ bool cbits::append(cbits* append_bits)
 			}
 			else
 			{
-				memcpy(new_data, this->m_data, this->m_len_bytes);
-				memcpy(new_data, this->m_data + this->m_len_bytes, append_bits->get_len_bytes());
+				if (this->m_data != nullptr)
+				{
+					memcpy(new_data, this->m_data, this->m_len_bytes);
+				}
+				memcpy(new_data + this->m_len_bytes, append_bits->get_data(), append_bits->get_len_bytes());
 			}
 			if (this->m_data != nullptr)
 				delete[](this->m_data);
@@ -173,15 +176,15 @@ cbits* cbits::bits_from_bin_file(string bin_file, READ_MODE endian)
 ubit_t * cbits::hex_to_bits(uint8_t * hex_data, int len, READ_MODE endian)
 {
 	int bits_len = len * 8;
-	ubit_t *st_bits = new ubit_t[bits_len];
-	ubit_t *bits_copy = st_bits;
+	ubit_t *pBits = new ubit_t[bits_len];
+	ubit_t *bits_copy = pBits;
 	if (endian == LEFT_BIG_ENDIAN)
 	{
 		for (int i = 0; i < len; i++)
 		{
 			for (int j = 0; j < 8; j++)
 			{
-				*st_bits++ = (hex_data[i] >> (7 - j)) & 1;
+				*pBits++ = (hex_data[i] >> (7 - j)) & 1;
 			}
 		}
 	}
@@ -191,7 +194,7 @@ ubit_t * cbits::hex_to_bits(uint8_t * hex_data, int len, READ_MODE endian)
 		{
 			for (int j = 0; j < 8; j++)
 			{
-				*st_bits++ = (hex_data[i] >> j) & 1;
+				*pBits++ = (hex_data[i] >> j) & 1;
 			}
 		}
 	}
@@ -291,10 +294,14 @@ cbits* cbits::truncate(int start, int len)
 	{
 		len = this->m_len_bits - start;
 	}
-	ubit_t* bin_data = cbits::hex_to_bits(this->m_data, this->m_len_bytes, LEFT_BIG_ENDIAN);
-	cbits *new_bits = new cbits(bin_data, len, true, this->m_endian);
-	delete[](bin_data);
-	return new_bits;
+	if (len > 0)
+	{
+		ubit_t* bin_data = cbits::hex_to_bits(this->m_data, this->m_len_bytes, LEFT_BIG_ENDIAN);
+		cbits *new_bits = new cbits(bin_data + start, len, true, this->m_endian);
+		delete[](bin_data);
+		return new_bits;
+	}
+	return nullptr;
 }
 
 void cbits::save(string file, bool bits_mode)
@@ -362,6 +369,30 @@ string cbits::data_str()
 	return ret_hex;
 }
 
+ubit_t * cbits::get_data_bits(int *bits_len)
+{
+	ubit_t *pBits = new ubit_t[this->m_len_bits];
+	if (pBits != nullptr)
+	{
+		uint8_t *pData = this->m_data;
+		uint8_t move_bit = 8;
+		for (int i = 0; i < this->m_len_bits; i++)
+		{
+			pBits[i] = (*pData >> --move_bit) & 1;
+			if (move_bit == 0)
+			{
+				move_bit = 8;
+				pData++;
+			}
+		}
+		if (bits_len != nullptr)
+		{
+			*bits_len = this->m_len_bits;
+		}
+	}
+	return pBits;
+}
+
 int cbits::read_file(string file, uint8_t ** data, int *len)
 {
 	FILE *fp = nullptr;
@@ -381,6 +412,18 @@ int cbits::read_file(string file, uint8_t ** data, int *len)
 		fclose(fp);
 	}
 	return 0;
+}
+
+cframe::cframe(cbits * bits, int offset):m_offset(offset)
+{
+	if (bits->get_len_bytes() > 0)
+	{
+		this->m_data = new uint8_t[bits->get_len_bytes()];
+		memcpy(this->m_data, bits->get_data(), bits->get_len_bytes());
+		this->m_len_bytes = bits->get_len_bytes();
+		this->m_len_bits = bits->get_len_bits();
+		this->m_endian = bits->get_endian();
+	}
 }
 
 int cframe::unpack_i(int start, int len)
@@ -427,7 +470,7 @@ float cframe::unpack_f(int start)
 	return ret;
 }
 
-#if 1
+#if 0
 void test1()
 {
 	cbits* test = new cbits("00110011110110101", 1);
