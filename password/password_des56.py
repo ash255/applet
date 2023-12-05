@@ -33,7 +33,7 @@ def get_pwd():
     cand1 = [''.join(x) for x in product('Cc','Oo','Mm','Bb','Aa')]
     # for pwd in product(lower+upper+number+letter, repeat=3):    #预计循环(2^5)*(95^3)*4=109,744,000 缩小后(2^5)*(93^3)*4=102,957,696
     # for pwd in permutations(lower+upper+number+letter, 3):    #预计循环(2^5)*(95*94*93)*4=106,302,720 缩小后(2^5)*(93*92*91)*4=99,660,288
-    for pwd in product(number+letter, 3):    #预计循环(2^5)*(43^3)*4=10,176,896 缩小后(2^5)*(41^3)*4=8,821,888
+    for pwd in product(number+letter, repeat=3):    #预计循环(2^5)*(43^3)*4=10,176,896 缩小后(2^5)*(41^3)*4=8,821,888
         for c1 in cand1:
             yield c1 + ''.join(pwd)
             yield pwd[0] + c1 + ''.join(pwd[1:])
